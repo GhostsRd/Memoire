@@ -1,0 +1,14 @@
+ingeress
+deploy
+service
+hpa
+
+Nginix si ona 2 serveur diff
+
+creer une configuration dans etc/nginx/sites-available 
+Puis lier sur etc/nginx/enable-sites
+#sudo ln -s /etc/nginx/sites-available/mon-super-site /etc/nginx/sites-enabled/
+verification si toute est OK sur nginx
+sudo nginx -t
+
+SOLUTION SUR LE PANNE DE SERVER ----- KEEPALIVE VIRTUEL

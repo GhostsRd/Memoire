@@ -1,0 +1,68 @@
+La règle d'or du DevOps 🏆
+L'environnement de production ne doit servir qu'à RECEVOIR des éléments déjà prêts (compilés et testés), jamais à les fabriquer.
+
+K8S: installation K3s version miniature
+curl -sfL https://get.k3s.io | sh -
+#installation avec traefik default unistall
+curl -sfL https://get.k3s.io | sh -s - --disable traefik
+
+installation dans le 2 et dans le 3e server
+copions d'abord le  token dans le server 1 
+cat /var/lib/rancher/k3s/server/node-token
+curl -sfL https://k3s.io | K3s_URL=https://IP_SERVEUR_1:6443 K3s_TOKEN=VOTRE_TOKEN sh -
+kubectl apply -f https://githubusercontent.com
+
+/usr/local/bin/k3s-uninstall.sh
+installation de longhorn
+sudo apt update && sudo apt install open-iscsi -y
+sudo systemctl enable --now iscsid
+
+
+#configuration de docker sur github
+Settings > Secrets and variables > Actions
+
+
+
+kubectl exec -it laravel-parcauto-deployment-f5454784-6gcpv -- php artisan migrate --force
+
+Voir dans mysql
+
+kubectl exec -it mysql-0 -- mysql -u root -proot
+
+si on a plusieur pod il faut dire session driver "database" pour le transfer de session
+
+reload kubectl
+
+
+Supprimer
+kubectl delete deployment portofolio-deployment
+
+Reload
+kubectl scale deployment portofolio-deployment --replicas=2
+
+
+>>>>>>>. Reloader le deployement en mettre a jour le deployement
+kubectl rollout restart deployment gpi-pivot-deployment
+
+kubectl rollout status deployment gpi-pivot-deployment
+
+
+
+STEP De travail:
+DEVELOPPEMT DE L"APPLICATIOM SY TEST
+DEPLOYEMENT DE L'APPLICATION SUR ENVIRONNEMENT PREPROD SY TEST
+DEPLOYEMENT DE L'APPLICATION SUR L'ENVIROMMENR PROD
+CONFIGURATIONDE L'APPLICATION SUR HPA ;;FAILOVER /INGRESS POUR LES SERVEUR/ POUR EVITER LE PANNE AVEC K8S
+
+
+
+ssh -v -i $env:USERPROFILE\.ssh\id_ed25519 -p 1994 leonce@135.125.235.67
+
+
+
+
+
+
+
+
+

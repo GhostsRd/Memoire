@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpi-pivot-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gpi-pivot
+  template:
+    metadata:
+      labels:
+        app: gpi-pivot
+    spec:
+      containers:
+        - name: laravel-app
+          image: leoncerado/gpi-pivot:latest
+          volumeMounts:
+            - name: storage-data
+              mountPath: /var/www/html/storage/app/public
+      volumes:
+        - name: storage-data
+          persistentVolumeClaim:
+            claimName: laravel-storage-pvc

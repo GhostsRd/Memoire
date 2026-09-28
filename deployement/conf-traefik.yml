@@ -1,0 +1,20 @@
+# domaine leonce-gpi.duckdns.org
+
+
+cat << 'EOF' > /opt/traefik/dynami/k3s-routing.yml
+http:
+  routers:
+    vers-mon-app-k3s:
+      rule: "Host(`leonce-gpi.duckdns.org`)" # <-- Remplacez par votre vrai nom de domaine
+      service: service-k3s-app
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: myresolver
+
+  services:
+    service-k3s-app:
+      loadBalancer:
+        servers:
+          - url: "http://172.20.0.1:30090 # <-- IP de la passerelle Docker pour atteindre K3s en local
+EOF

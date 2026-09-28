@@ -1,0 +1,14 @@
+Note: N8N
+-  nOCODE
+-
+
+CLoud computing: je paie c que je consomme
+Concept as a service:: 
+Iaas : Infrastucture as a Service // gerer ma systm en appaertiennant pas le materiels
+Paas: Plateform as a service ///gestion de mis a jour et les sys et app
+Saas: Software as a service /// les logiciels 
+Baas: Backup as a service /// externalisation des donner
+
+AZURE MIGRATE::
+-On primise ---> migration des serveur, des donner  des BD
+OUTILS: Sauvegarde et restauration de azure,query editor de azure. SQl MAnagement Studio

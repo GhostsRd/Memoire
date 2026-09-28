@@ -1,0 +1,25 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gpi-pivot-hpa
+  namespace: default
+spec:
+  # La cible : ton déploiement Laravel
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gpi-pivot-deployment
+  
+  # Les limites de Pods autorisées
+  minReplicas: 2   # Jamais moins de 2 pods (sécurité/haute disponibilité)
+  maxReplicas: 10  # Maximum 10 pods si le serveur OVH est surchargé
+  
+  # La règle de décision (les fameuses moyennes)
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 5 # Si la moyenne du CPU dépasse 70%, on scale UP !
+  

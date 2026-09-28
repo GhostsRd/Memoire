@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpi-pivot-deployment
+spec:
+  #replicas: 4 # Aligné sur ton fonctionnement local à 1 instance pour éviter les conflits 419
+  selector:
+    matchLabels:
+      app: gpi-pivot
+  template:
+    metadata:
+      labels:
+        app: gpi-pivot
+    spec:
+      # 1. Conteneur d'initialisation pour appliquer les migrations automatiquement
+      initContainers:
+        - name: run-migrations
+          image: leoncerado/gpi-pivot:latest
+          command: ["php", "artisan", "migrate", "--force"]
+          env:
+            - name: DB_CONNECTION
+              value: "mysql"
+            - name: DB_HOST
+              value: "mysql-service"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_DATABASE
+              value: "gpi" # <-- MIS À JOUR (Selon ton .env local)
+            - name: DB_USERNAME
+              value: "root"
+            - name: DB_PASSWORD
+              value: "root" # Garde "root" ici car c'est le mot de passe défini dans ton mysql-db.yml Kubernetes
+
+      # 2. Conteneur applicatif principal
+      containers:
+        - name: laravel-app
+          image: leoncerado/gpi-pivot:latest
+          # Commande qui nettoie les caches au démarrage avant de lancer le serveur
+          imagePullPolicy: Always
+          command: ["/bin/sh", "-c", "php artisan config:clear && php artisan cache:clear && php artisan serve --host=0.0.0.0 --port=9000"]
+          
+          ports:
+            - containerPort: 8000
+          env:
+            - name: APP_NAME
+              value: "Laravel"
+            - name: APP_URl
+              value: "http://10.10.10.203:30090"
+            - name: ASSET_URL
+              value: "http://10.10.10.203:30090" 
+            - name: APP_ENV
+              value: "production" # Reste en production pour K8s, mais nettoyé de ses caches
+            - name: APP_KEY
+              value: "base64:y9jPdwkxXIXf+oZd3scke9J3riJpM8oZxeaPqN/rbpc="
+            - name: APP_DEBUG
+              value: "true" # Pratique pour voir la vraie erreur directement sur le navigateur si ça bloque !
+            
+            # Configuration Base de données
+            - name: DB_CONNECTION
+              value: "mysql"
+            - name: DB_HOST
+              value: "mysql-service"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_DATABASE
+              value: "gpi" # <-- MIS À JOUR
+            - name: DB_USERNAME
+              value: "root"
+            - name: DB_PASSWORD
+              value: "root"
+
+            # Sécurité & Sessions (Pour éradiquer définitivement l'erreur 419)
+            - name: SESSION_DRIVER
+              value: "database"
+            - name: SESSION_LIFETIME
+              value: "120"
+            - name: SESSION_ENCRYPT
+              value: "false"
+            - name: SESSION_PATH
+              value: "/"
+            - name: SESSION_DOMAIN
+              value: "null"
+            - name: SESSION_SECURE_COOKIE
+              value: "false" # Permet de valider les formulaires sans HTTPS
+
+            # Mails et Logs (Évite les crashs 500 post-inscription)
+            - name: LOG_CHANNEL
+              value: "stack"
+            - name: LOG_STACK
+              value: "single"
+            - name: MAIL_MAILER
+              value: "log"

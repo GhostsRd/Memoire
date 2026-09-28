@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi # 5 Go de disque pour vos données de parc auto
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+spec:
+  serviceName: "mysql"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+
+# ... (Le début du fichier avec le PVC reste identique)
+    spec:
+      containers:
+        - name: mysql
+          image: mariadb:10.11 # <-- On utilise MariaDB (compatible v1)
+          env:
+            - name: MARIADB_ROOT_PASSWORD # <-- Changement de nom de variable
+              value: "root"
+            - name: MARIADB_DATABASE # <-- Changement de nom de variable
+              value: "gpi"
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+# ... (Le reste du fichier reste identique)
+
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 5Gi
