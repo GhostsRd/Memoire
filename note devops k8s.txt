@@ -57,12 +57,55 @@ CONFIGURATIONDE L'APPLICATION SUR HPA ;;FAILOVER /INGRESS POUR LES SERVEUR/ POUR
 
 
 ssh -v -i $env:USERPROFILE\.ssh\id_ed25519 -p 1994 leonce@135.125.235.67
+GANDICLOUD
+ssh -p 5522 leonce@155.133.131.167
+Mdp: bHPJhcKRTX8fjiPw
+
+#droit rollout pour user simple
+
+sudo chmod 644 /etc/rancher/k3s/k3s.yaml
+
+
+kubectl version windows
+https://dl.k8s.io/release/v1.30.0/bin/windows/amd64/kubectl.exe
+
+note cle d'api SYNCTIng
+
+ssh -L 6443:127.0.0.1:6443 root@135.125.235.67
+locale
+kubectl port-forward deployment/gpi-pivot-deployment 8384:8384
+
+
+gpi-pivot-deployment-5fb57b7467-zb4ts
+AxDPuZTWu5ZSSdA6XqondxJKf9JphzCY
+
+id OVH ::: HXVSESW-XZWSBSW-Z324N23-KAZEL6B-CUOQ3MR-7AR66DC-TSNT4OY-GMQGGQJ
+
+
+test de creation de fichie 
+ kubectl exec -it gpi-pivot-deployment-59695bdd88-npths -c syncthing -- ls -la /var/syncthing/uploads
+
+
+test de suppresion de fichier dans oVH 
+kubectl exec -it gpi-pivot-deployment-59695bdd88-npths -c syncthing -- rm /var/syncthing/uploads/test-sync.txt
+
+### sychronisation des fihcier
+##synchronisation mysql Master/slave
 
 
 
 
 
+[(none)]> CHANGE MASTER TO   MASTER_HOST='135.125.235.67',   MASTER_PORT=30306,   MASTER_USER='repl',   MASTER_PASSWORD='root',   MASTER_LOG_FILE='mysql-bin.000002',   MASTER_LOG_POS=238;          
 
 
-
-
+CHANGE MASTER TO
+  MASTER_HOST='135.125.235.67',
+  MASTER_PORT=30306,
+  MASTER_USER='repl',
+  MASTER_PASSWORD='root',
+  MASTER_LOG_FILE='mysql-bin.000002',
+  MASTER_LOG_POS=462426;
+STOP SLAVE;
+SET GLOBAL sql_slave_skip_counter = 1;
+START SLAVE;                                       

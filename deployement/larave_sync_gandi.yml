@@ -1,0 +1,184 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: laravel-storage-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: syncthing-config-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpi-pivot-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gpi-pivot
+  template:
+    metadata:
+      labels:
+        app: gpi-pivot
+    spec:
+      # 1. Conteneur d'initialisation pour exécuter les migrations
+      initContainers:
+        - name: run-migrations
+          image: leoncerado/gpi-pivot:latest
+          command: ["php", "artisan", "migrate", "--force"]
+          env:
+            - name: DB_CONNECTION
+              value: "mysql"
+            - name: DB_HOST
+              value: "mysql-service"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_DATABASE
+              value: "gpi"
+            - name: DB_USERNAME
+              value: "root"
+            - name: DB_PASSWORD
+              value: "root"
+
+      # 2. Conteneurs principaux du Pod
+      containers:
+        # A. Application Laravel Principal
+        - name: laravel-app
+          image: leoncerado/gpi-pivot:latest
+          imagePullPolicy: Always
+          command: ["/bin/sh", "-c", "php artisan config:clear && php artisan cache:clear && php artisan serve --host=0.0.0.0 --port=9000"]
+          ports:
+            - containerPort: 9000
+          env:
+            - name: APP_NAME
+              value: "Laravel"
+            - name: APP_URL
+              value: "http://155.133.131.167:30090"
+            - name: ASSET_URL
+              value: "http://155.133.131.167:30090"
+            - name: APP_ENV
+              value: "production"
+            - name: APP_KEY
+              value: "base64:y9jPdwkxXIXf+oZd3scke9J3riJpM8oZxeaPqN/rbpc="
+            - name: APP_DEBUG
+              value: "true"
+            
+            # Configuration Base de données
+            - name: DB_CONNECTION
+              value: "mysql"
+            - name: DB_HOST
+              value: "mysql-service"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_DATABASE
+              value: "gpi"
+            - name: DB_USERNAME
+              value: "root"
+            - name: DB_PASSWORD
+              value: "root"
+
+            # Configuration Mail
+            - name: MAIL_MAILER
+              value: "smtp"
+            - name: MAIL_HOST
+              value: "smtp.gmail.com"
+            - name: MAIL_PORT
+              value: "587"
+            - name: MAIL_ENCRYPTION
+              value: "tls"
+            - name: MAIL_USERNAME
+              value: "rrakotonirina@pivotworks.org"
+            - name: MAIL_PASSWORD
+              value: "onsqvgxnevqhvdas"
+            - name: MAIL_FROM_ADDRESS
+              value: "rrakotonirina@pivotworks.org"
+            - name: MAIL_FROM_NAME
+              value: "GPI"
+
+            # Sécurité & Sessions
+            - name: SESSION_DRIVER
+              value: "database"
+            - name: SESSION_LIFETIME
+              value: "120"
+            - name: SESSION_ENCRYPT
+              value: "false"
+            - name: SESSION_PATH
+              value: "/"
+            - name: SESSION_DOMAIN
+              value: "null"
+            - name: SESSION_SECURE_COOKIE
+              value: "false"
+
+            # Logs
+            - name: LOG_CHANNEL
+              value: "stack"
+            - name: LOG_STACK
+              value: "single"
+
+          volumeMounts:
+            - name: storage-data
+              mountPath: /var/www/html/storage/app/public
+
+        # B. Sidecar Syncthing pour la synchronisation avec Gandi
+        - name: syncthing
+          image: syncthing/syncthing:latest
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+          ports:
+            - containerPort: 8384
+              name: gui
+            - containerPort: 22000
+              name: sync-tcp
+          volumeMounts:
+            - name: storage-data
+              mountPath: /var/syncthing/uploads
+            - name: syncthing-config
+              mountPath: /var/syncthing/config
+
+      volumes:
+        - name: storage-data
+          persistentVolumeClaim:
+            claimName: laravel-storage-pvc
+        - name: syncthing-config
+          persistentVolumeClaim:
+            claimName: syncthing-config-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gpi-service
+  namespace: default
+spec:
+  selector:
+    app: gpi-pivot
+  ports:
+    - name: http
+      port: 80
+      targetPort: 9000
+      nodePort: 30090
+    - name: syncthing-sync
+      port: 22000
+      targetPort: 22000
+      nodePort: 32000
+  type: NodePort
