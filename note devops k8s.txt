@@ -1,4 +1,4 @@
-La règle d'or du DevOps 🏆
+La règle d'or du DevOps 🏆 okokok
 L'environnement de production ne doit servir qu'à RECEVOIR des éléments déjà prêts (compilés et testés), jamais à les fabriquer.
 
 K8S: installation K3s version miniature
