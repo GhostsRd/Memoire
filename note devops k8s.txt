@@ -108,4 +108,9 @@ CHANGE MASTER TO
   MASTER_LOG_POS=462426;
 STOP SLAVE;
 SET GLOBAL sql_slave_skip_counter = 1;
-START SLAVE;                                       
+START SLAVE;                 
+
+
+
+kubectl scale deployment gpi-pivot-deployment --replicas=1
+                      
