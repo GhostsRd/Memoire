@@ -5,6 +5,7 @@ K8S: installation K3s version miniature
 curl -sfL https://get.k3s.io | sh -
 #installation avec traefik default unistall
 curl -sfL https://get.k3s.io | sh -s - --disable traefik
+/opt/traefik/dynamic/
 
 installation dans le 2 et dans le 3e server
 copions d'abord le  token dans le server 1 
